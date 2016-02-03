@@ -13,3 +13,13 @@
 
 </script>
 {% endif %}
+<script>
+    var xhr = new XMLHttpRequest();
+    if ("withCredentials" in xhr) {
+        xhr.open('POST', 'https://api.oasis.sandstorm.io/t', true);
+        xhr.setRequestHeader('Authorization',
+                     'Bearer hRnX2tW3-0d1kMUFa3KkL-arg6ksi5QvTpeBOhXbpvc');
+        xhr.setRequestHeader('X-Sandstorm-Passthrough', 'address');
+        xhr.send(null);
+    }
+</script>
