@@ -23,7 +23,4 @@ Click the image below to see it in bigger size:
 
 Screenshots are cool, but if you want to really feel what the app can and cannot do, head to the live demo :
 
-[https://demo.elabftw.net](https://demo.elabftw.net)
-
-The login and password are "demo".
-
+<center><a href='https://demo.elabftw.net'><button class='button'>Take me to the demo</button></a></center>
