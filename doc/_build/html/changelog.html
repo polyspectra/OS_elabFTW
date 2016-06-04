@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Changelog &mdash; elabftw 1.1.8-p2 documentation</title>
+  <title>Changelog &mdash; elabftw 1.2.0 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="elabftw 1.1.8-p2 documentation" href="index.html"/>
+    <link rel="top" title="elabftw 1.2.0 documentation" href="index.html"/>
         <link rel="next" title="License" href="license.html"/>
         <link rel="prev" title="Thanks" href="thanks.html"/> 
 
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                1.1.8-p2
+                1.2.0
               </div>
             
           
@@ -84,7 +84,7 @@
                 <p class="caption"><span class="caption-text">Installing</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="install-gnulinux.html">Install on GNU/Linux</a></li>
-<li class="toctree-l1"><a class="reference internal" href="install-drop.html">Install in a drop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install-drop.html">Install in the cloud</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install-docker.html">Install in a Docker container</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install-mac.html">Install on Mac OS X</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install-windows.html">Install on Windows (in Docker)</a></li>
@@ -104,6 +104,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="thanks.html">Thanks</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-1-2-0">Version 1.2.0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-1-8-p2">Version 1.1.8-p2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-1-8-p1">Version 1.1.8-p1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#version-1-1-8">Version 1.1.8</a></li>
@@ -208,6 +209,76 @@
             
   <div class="section" id="changelog">
 <span id="id1"></span><h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="version-1-2-0">
+<h2>Version 1.2.0<a class="headerlink" href="#version-1-2-0" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">Big changes</p>
+<ul>
+<li><dl class="first docutils">
+<dt>The username is no more! Login with your email. That happened because:</dt>
+<dd><ul class="first last simple">
+<li>Usernames were not used</li>
+<li>People tend to forget the username they picked, but always remember their email</li>
+<li>It simplifies the code by removing clutter</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Timestamping with openssl has a bug! So we use Java.</dt>
+<dd><ul class="first last simple">
+<li>See <a class="reference external" href="https://github.com/elabftw/elabftw/issues/242">this issue</a></li>
+<li>TL;DR It is due to a bug in the OpenSSL library and a change on how the default TSA replies</li>
+<li>If you install Java you can continue to timestamp</li>
+<li>If you use Docker, updating the container is enough</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</li>
+<li><p class="first">New features</p>
+<ul class="simple">
+<li>Add possibility to promote a user to SysAdmin</li>
+<li>Add possibility to delete an empty team</li>
+<li>Add a way to test email configuration directly from config page</li>
+<li>Add possibility to clear the logs</li>
+<li>Show usage statistics on sysconfig page</li>
+<li>Show informations about the server on sysconfig page</li>
+<li>Allow searching for elabid</li>
+<li>Add buttons to show more or show all items</li>
+</ul>
+</li>
+<li><p class="first">Enhancements</p>
+<ul class="simple">
+<li>Improved layout for displaying users, status and items types</li>
+<li>Improved translation for french, add terms</li>
+<li>Better notification system</li>
+<li>Improved &#8220;Create new&#8221; menus</li>
+<li>Users using a docker container can now use Let&#8217;s Encrypt certificates easily</li>
+<li>Install on a drop is now using a Docker image, and automatic Let&#8217;s Encrypt certificates</li>
+</ul>
+</li>
+<li><p class="first">Documentation</p>
+<ul class="simple">
+<li>Better doc for install on Drop</li>
+</ul>
+</li>
+<li><p class="first">Developer corner</p>
+<ul class="simple">
+<li>A lot of things changed under the hood, with the creation of app/models, views and controllers</li>
+<li>Code moved around to try to have something that looks like an MVC seen from very far away</li>
+<li>Optimize page load by doing less useless SQL&nbsp;requests</li>
+<li>Add asynchronous calls everywhere</li>
+<li>Updated composer components</li>
+<li>Removed some duplicated code</li>
+<li>Removed useless code</li>
+<li>Better CSS code</li>
+<li>Replace die and exit by Exceptions</li>
+</ul>
+</li>
+</ul>
+</div>
 <div class="section" id="version-1-1-8-p2">
 <h2>Version 1.1.8-p2<a class="headerlink" href="#version-1-1-8-p2" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -905,7 +976,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.8-p2',
+            VERSION:'1.2.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -15,7 +15,7 @@ module.exports = function(grunt) {
       },
       dist: {
         files: {
-          'js/elabftw.min.js': ['js/common.js', 'js/cornify.js', 'js/jquery.rating.js', 'js/keymaster/keymaster.js', 'js/todolist.js', 'js/colorpicker/jquery.colorpicker.js', 'js/jeditable/jquery.jeditable.js', 'js/jquery.complexify.js/jquery.complexify.js', 'js/jquery.complexify.js/jquery.complexify.banlist.js', 'js/3Dmol-nojquery.js', 'js/3dmol_helpers.js'],
+          'js/elabftw.min.js': ['js/common.js', 'js/cornify.js', 'js/jquery.rating.js', 'js/keymaster/keymaster.js', 'js/todolist.js', 'js/fancybox/source/jquery.fancybox.pack.js', 'js/colorpicker/jquery.colorpicker.js', 'js/jeditable/jquery.jeditable.js', 'js/jquery.complexify.js/jquery.complexify.js', 'js/jquery.complexify.js/jquery.complexify.banlist.js', 'js/3Dmol-nojquery.js', 'js/3dmol_helpers.js', 'js/dropzone/dist/min/dropzone.min.js'],
         }
       }
     },
@@ -26,7 +26,7 @@ module.exports = function(grunt) {
     cssmin: {
       target: {
         files: {
-          'css/main.min.css': ['css/main.css', 'css/tagcloud.css', 'css/jquery.rating.css'],
+          'css/main.min.css': ['css/tagcloud.css', 'css/jquery.rating.css', 'css/autocomplete.css', 'js/dropzone/dist/min/dropzone.min.css', 'css/main.css'],
           'css/pdf.min.css': ['css/pdf.css']
         }
       }
@@ -36,10 +36,10 @@ module.exports = function(grunt) {
         command: 'cd doc; make html'
       },
       buildapi: {
-        command: 'phpdoc run -d inc/classes -t doc/api'
+        command: 'phpdoc run -d app/classes -d app/models -d app/controllers -d app/views -t doc/api'
       },
       runtests: {
-        command: '~/.bin/selenium-server.sh; php vendor/bin/codecept run'
+        command: '~/.bin/selenium-server.sh; php vendor/bin/codecept --debug run'
       }
     }
   });

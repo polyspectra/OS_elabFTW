@@ -7,6 +7,9 @@
  * @see http://www.elabftw.net Official website
  * @license AGPL-3.0
  */
+namespace Elabftw\Elabftw;
+
+use \Exception;
 
 /**
  * This must be included on top of every page.
@@ -23,21 +26,18 @@ if (is_readable('config.php')) {
 } elseif (is_readable('../config.php')) {
     // we might be called from app folder
     require_once '../config.php';
+} elseif (is_readable('../../config.php')) {
+    require_once '../../config.php';
 } else {
     header('Location: install');
     exit;
-}
-
-// check for maintenance mode
-if (file_exists(ELAB_ROOT . 'maintenance')) {
-    die('Maintenance mode is enabled. Check back later.');
 }
 
 require_once ELAB_ROOT . 'vendor/autoload.php';
 
 // SQL CONNECT
 try {
-    $pdo = \Elabftw\Elabftw\Db::getConnection();
+    $pdo = Db::getConnection();
 } catch (Exception $e) {
     die('Error connecting to the database : ' . $e->getMessage());
 }
@@ -61,7 +61,7 @@ textdomain($domain);
 
 // run the update script if we have the wrong schema version
 try {
-    $update = new \Elabftw\Elabftw\Update();
+    $update = new Update();
 } catch (Exception $e) {
     die($e->getMessage());
 }
@@ -71,15 +71,14 @@ if (!is_null((get_config('schema')))) {
 
     if (get_config('schema') < $update::REQUIRED_SCHEMA) {
         try {
-            $_SESSION['infos'] = $update->runUpdateScript();
+            $_SESSION['ok'] = $update->runUpdateScript();
         } catch (Exception $e) {
             $msg_arr[] = 'Error updating the database: ' . $e->getMessage();
-            $_SESSION['errors'] = $msg_arr;
+            $_SESSION['ko'] = $msg_arr;
         }
     }
 }
 
-$user = new \Elabftw\Elabftw\User();
 
 // pages where you don't need to be logged in
 // reset.php is in fact app/reset.php but we use basename so...
@@ -87,7 +86,8 @@ $nologin_arr = array('login.php', 'login-exec.php', 'register.php', 'register-ex
 
 if (!isset($_SESSION['auth']) && !in_array(basename($_SERVER['SCRIPT_FILENAME']), $nologin_arr)) {
     // try to login with the cookie
-    if (!$user->loginWithCookie()) {
+    $Auth = new Auth();
+    if (!$Auth->loginWithCookie()) {
         // maybe we clicked an email link and we want to be redirected to the page upon successful login
         // so we store the url in a cookie expiring in 5 minutes to redirect to it after login
         $host = $_SERVER['HTTP_HOST'];

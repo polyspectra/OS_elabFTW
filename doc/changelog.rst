@@ -3,6 +3,58 @@
 Changelog
 =========
 
+Version 1.2.0
+-------------
+
+* Big changes
+
+  * The username is no more! Login with your email. That happened because:
+     * Usernames were not used
+     * People tend to forget the username they picked, but always remember their email
+     * It simplifies the code by removing clutter
+
+  * Timestamping with openssl has a bug! So we use Java.
+     * See `this issue <https://github.com/elabftw/elabftw/issues/242>`_
+     * TL;DR It is due to a bug in the OpenSSL library and a change on how the default TSA replies
+     * If you install Java you can continue to timestamp
+     * If you use Docker, updating the container is enough
+
+* New features
+
+  * Add possibility to promote a user to SysAdmin
+  * Add possibility to delete an empty team
+  * Add a way to test email configuration directly from config page
+  * Add possibility to clear the logs
+  * Show usage statistics on sysconfig page
+  * Show informations about the server on sysconfig page
+  * Allow searching for elabid
+  * Add buttons to show more or show all items
+
+* Enhancements
+
+  * Improved layout for displaying users, status and items types
+  * Improved translation for french, add terms
+  * Better notification system
+  * Improved "Create new" menus
+  * Users using a docker container can now use Let's Encrypt certificates easily
+  * Install on a drop is now using a Docker image, and automatic Let's Encrypt certificates
+
+* Documentation
+
+  * Better doc for install on Drop
+
+* Developer corner
+
+  * A lot of things changed under the hood, with the creation of app/models, views and controllers
+  * Code moved around to try to have something that looks like an MVC seen from very far away
+  * Optimize page load by doing less useless SQL requests
+  * Add asynchronous calls everywhere
+  * Updated composer components
+  * Removed some duplicated code
+  * Removed useless code
+  * Better CSS code
+  * Replace die and exit by Exceptions
+
 Version 1.1.8-p2
 ----------------
 

@@ -7,217 +7,30 @@
  * @see http://www.elabftw.net Official website
  * @license AGPL-3.0
  */
+namespace Elabftw\Elabftw;
+
+use \Exception;
+use \PDO;
+use \Swift_Mailer;
+use \Swift_SmtpTransport;
+use \Swift_MailTransport;
+use \Swift_SendmailTransport;
 
 /**
  * This file holds global functions available everywhere.
  *
+ * @deprecated
  */
-use \Elabftw\Elabftw\Tools as Tools;
 
 /**
- * Return the date as YYYYMMDD format.
+ * Validate POST variables containing login/validation data for the TSP;
+ * Substitute missing values with empty strings and return as array
  *
- * @return string
+ * @return array
  */
-function kdate()
-{
-    return date('Ymd');
-}
-
-/**
- * Create a jpg thumbnail from images of type jpg, png or gif.
- *
- * @param string $src Path to the original file
- * @param string $ext Extension of the file
- * @param string $dest Path to the place to save the thumbnail
- * @param int $desired_width Width of the thumbnail (height is automatic depending on width)
- * @return null|false
- */
-function make_thumb($src, $ext, $dest, $desired_width)
-{
-    // we don't want to work on too big images
-    // put the limit to 5 Mbytes
-    if (filesize($src) > 5000000) {
-        return false;
-    }
-
-    // the used fonction is different depending on extension
-    if (preg_match('/(jpg|jpeg)$/i', $ext)) {
-        $source_image = imagecreatefromjpeg($src);
-    } elseif (preg_match('/(png)$/i', $ext)) {
-        $source_image = imagecreatefrompng($src);
-    } elseif (preg_match('/(gif)$/i', $ext)) {
-        $source_image = imagecreatefromgif($src);
-    } else {
-        return false;
-    }
-
-    $width = imagesx($source_image);
-    $height = imagesy($source_image);
-
-    // find the "desired height" of this thumbnail, relative to the desired width
-    $desired_height = floor($height * ($desired_width / $width));
-
-    // create a new, "virtual" image
-    $virtual_image = imagecreatetruecolor($desired_width, $desired_height);
-
-    // copy source image at a resized size
-    imagecopyresized($virtual_image, $source_image, 0, 0, 0, 0, $desired_width, $desired_height, $width, $height);
-
-    // create the physical thumbnail image to its destination (85% quality)
-    imagejpeg($virtual_image, $dest, 85);
-}
-
-/**
- * Check in input is a positive integer.
- *
- * @param integer $int The int to check
- * @return bool Return false if it's not an int
- */
-function is_pos_int($int)
-{
-    $filter_options = array(
-        'options' => array(
-            'min_range' => 1
-        ));
-    return filter_var($int, FILTER_VALIDATE_INT, $filter_options);
-}
-
-/**
- * Check if an item has a file attached.
- *
- * @param int $id ID of the item to check
- * @param string $type
- * @return bool Return false if there is now file attached
- */
-function has_attachement($id, $type)
-{
-    global $pdo;
-    $sql = "SELECT id FROM uploads
-        WHERE item_id = :item_id AND type = :type LIMIT 1";
-    $req = $pdo->prepare($sql);
-    $req->bindParam(':item_id', $id);
-    $req->bindParam(':type', $type);
-    $req->execute();
-    return $req->rowCount() > 0;
-}
-
-
-/**
- * Main function to search for something
- *
- * @param string $type Can be 'xp' or 'db'
- * @param string $query The thing to search
- * @param int $userid Userid is used for 'xp' only
- * @return false|array $results_arr Array of ID with the $query string inside
- */
-function search_item($type, $query, $userid)
-{
-    global $pdo;
-    // we make an array for the resulting ids
-    $results_arr = array();
-    if ($type === 'xp') {
-        // search in title date and body
-        $sql = "SELECT id FROM experiments
-            WHERE userid = :userid AND (title LIKE '%$query%' OR date LIKE '%$query%' OR body LIKE '%$query%')";
-        $req = $pdo->prepare($sql);
-        $req->execute(array(
-            'userid' => $userid
-        ));
-        // put resulting ids in the results array
-        while ($data = $req->fetch()) {
-            $results_arr[] = $data['id'];
-        }
-        // now we search in tags, and append the found ids to our result array
-        $sql = "SELECT item_id FROM experiments_tags WHERE userid = :userid AND tag LIKE '%$query%'";
-        $req = $pdo->prepare($sql);
-        $req->execute(array(
-            'userid' => $userid
-        ));
-        while ($data = $req->fetch()) {
-            $results_arr[] = $data['item_id'];
-        }
-        // now we search in file comments and filenames
-        $sql = "SELECT item_id FROM uploads WHERE userid = :userid AND (comment LIKE '%$query%' OR real_name LIKE '%$query%') AND type = 'experiment'";
-        $req = $pdo->prepare($sql);
-        $req->execute(array(
-            'userid' => $userid
-        ));
-        while ($data = $req->fetch()) {
-            $results_arr[] = $data['item_id'];
-        }
-        $req->closeCursor();
-
-    } elseif ($type === 'db') {
-        // search in title date and body
-        $sql = "SELECT id FROM items
-            WHERE (title LIKE '%$query%' OR date LIKE '%$query%' OR body LIKE '%$query%')";
-        $req = $pdo->prepare($sql);
-        $req->execute();
-        // put resulting ids in the results array
-        while ($data = $req->fetch()) {
-            $results_arr[] = $data['id'];
-        }
-        $req->closeCursor();
-        // now we search in tags, and append the found ids to our result array
-        $sql = "SELECT item_id FROM items_tags WHERE tag LIKE '%$query%'";
-        $req = $pdo->prepare($sql);
-        $req->execute(array(
-            'userid' => $_SESSION['userid']
-        ));
-        while ($data = $req->fetch()) {
-            $results_arr[] = $data['item_id'];
-        }
-        // now we search in file comments and filenames
-        $sql = "SELECT item_id FROM uploads WHERE (comment LIKE '%$query%' OR real_name LIKE '%$query%') AND type = 'database'";
-        $req = $pdo->prepare($sql);
-        $req->execute();
-        while ($data = $req->fetch()) {
-            $results_arr[] = $data['item_id'];
-        }
-            $req->closeCursor();
-    }
-    // filter out duplicate ids and reverse the order; XP should be sorted by date
-    return array_reverse(array_unique($results_arr));
-}
-
-/**
- * Display the tags.
- *
- * @param int $item_id The ID of the item for which we want the tags
- * @param string $table The table can be experiments_tags or items_tags
- * @return null|false Will show the HTML for tags or false if there is no tags
- */
-function show_tags($item_id, $table)
-{
-    global $pdo;
-    $sql = "SELECT tag FROM $table WHERE item_id = $item_id";
-    $req = $pdo->prepare($sql);
-    $req->execute();
-    $tagcount = $req->rowCount();
-    if ($tagcount > 0) {
-        echo "<span class='tags'><img src='img/tags.png' alt='tags' /> ";
-        while ($tags = $req->fetch()) {
-            if ($table === 'experiments_tags') {
-                echo "<a href='experiments.php?mode=show&tag=" . urlencode(stripslashes($tags['tag'])) . "'>" . stripslashes($tags['tag']) . "</a> ";
-            } else { // table is items_tags
-                echo "<a href='database.php?mode=show&tag=" . urlencode(stripslashes($tags['tag'])) . "'>" . stripslashes($tags['tag']) . "</a> ";
-            }
-        }
-        echo "</span>";
-    } else {
-        return false;
-    }
-}
-/**
-     * Validate POST variables containing login/validation data for the TSP;
-     * Substitute missing values with empty strings and return as array
-     *
-     * @return array
-     */
 function processTimestampPost()
 {
-    $crypto = new \Elabftw\Elabftw\CryptoWrapper();
+    $crypto = new CryptoWrapper();
 
     if (isset($_POST['stampprovider'])) {
         $stampprovider = filter_var($_POST['stampprovider'], FILTER_VALIDATE_URL);
@@ -229,6 +42,7 @@ function processTimestampPost()
         if (is_readable(realpath(ELAB_ROOT . $cert_chain)) || realpath($cert_chain)) {
             $stampcert = $cert_chain;
         } else {
+            throw new Exception('Cannot read provided certificate file.');
             $stampcert = '';
         }
     } else {
@@ -244,12 +58,8 @@ function processTimestampPost()
     } else {
         $stamplogin = '';
     }
-    if (isset($_POST['stamppass'])) {
-        try {
-            $stamppass = $crypto->encrypt($_POST['stamppass']);
-        } catch (Exception $e) {
-            $stamppass = '';
-        }
+    if (isset($_POST['stamppass']) && !empty($_POST['stamppass'])) {
+        $stamppass = $crypto->encrypt($_POST['stamppass']);
     } else {
         $stamppass = '';
     }
@@ -262,272 +72,30 @@ function processTimestampPost()
 }
 
 /**
- * Show an experiment (in mode=show).
- *
- * @param int $id The ID of the experiment to show
- * @param string $display Can be 'compact' or 'default'
- * @return string|null HTML of the single experiment
- */
-function showXP($id, $display = 'default')
-{
-    global $pdo;
-    $sql = "SELECT experiments.*, status.color FROM
-        experiments LEFT JOIN
-        status ON (experiments.status = status.id)
-        WHERE experiments.id = :id";
-    $req = $pdo->prepare($sql);
-    $req->bindParam(':id', $id, PDO::PARAM_INT);
-    $req->execute();
-    $experiments = $req->fetch();
-
-    if ($display === 'compact') {
-        // COMPACT MODE //
-        echo "<section class='item_compact' style='border-left: 6px solid #" . $experiments['color'] . "'>";
-        echo "<a href='experiments.php?mode=view&id=" . $experiments['id'] . "'>";
-        echo "<span class='date date_compact'>" . Tools::formatDate($experiments['date']) . "</span> ";
-        echo "<span style='padding-left:10px;'>";
-        // show lock if item is locked on viewXP
-        if ($experiments['locked']) {
-            echo "<img src='img/lock-blue.png' alt='lock' title='Locked' />";
-        }
-        echo stripslashes($experiments['title']);
-        echo "</a></span></section>";
-    } else { // NOT COMPACT
-        ?>
-        <section class="item" style='border-left: 6px solid #<?php echo $experiments['color']; ?>'>
-        <?php
-        // we show the abstract of the experiment on mouse hover with the title attribute
-        // we check if it is our experiment. It would be best to check if we have visibility rights on it
-        // but atm there is no such function. So we limit this feature to experiments we own, for simplicity.
-        if (is_owned_by_user($id, 'experiments', $_SESSION['userid'])) {
-            $body_abstract = str_replace("'", "", substr(strip_tags($experiments['body']), 0, 100));
-        } else {
-            $body_abstract = '';
-        }
-        echo "<a title='" . $body_abstract . "' href='experiments.php?mode=view&id=" . $experiments['id'] . "'>";
-        // show stamp if experiment is timestamped
-        if ($experiments['timestamped']) {
-            echo "<img class='align_right' src='img/stamp.png' alt='stamp' title='experiment timestamped' />";
-        }
-        echo "<p class='title'>";
-        // show lock if item is locked on viewXP
-        if ($experiments['locked']) {
-            echo "<img style='padding-bottom:3px;' src='img/lock-blue.png' alt='lock' title='Locked' /> ";
-        }
-        // TITLE
-        echo stripslashes($experiments['title']) . "</p></a>";
-        // DATE
-        echo "<span class='date'><img class='image' src='img/calendar.png' /> " . Tools::formatDate($experiments['date']) . "</span> ";
-        // _('Tags')
-        echo show_tags($id, 'experiments_tags');
-        // show attached if there is a file attached
-        if (has_attachement($experiments['id'], 'experiments')) {
-            echo "<img class='align_right' src='img/attached.png' alt='file attached' />";
-        }
-        echo "</section>";
-    }
-}
-
-/**
- * Display the stars rating for a DB item.
- *
- * @param int $rating The number of stars to display
- * @return string|null HTML of the stars
- */
-function show_stars($rating)
-{
-    echo "<span class='align_right'>";
-    if ($rating == 1) {
-        echo "<img src='img/star-green.png' alt='1' /><img src='img/star-gray.png' alt='1' /><img src='img/star-gray.png' alt='1' /><img src='img/star-gray.png' alt='1' /><img src='img/star-gray.png' alt='1' />";
-    }
-    if ($rating == 2) {
-        echo "<img src='img/star-green.png' alt='1' /><img src='img/star-green.png' alt='1' /><img src='img/star-gray.png' alt='1' /><img src='img/star-gray.png' alt='1' /><img src='img/star-gray.png' alt='1' />";
-    }
-    if ($rating == 3) {
-        echo "<img src='img/star-green.png' alt='1' /><img src='img/star-green.png' alt='1' /><img src='img/star-green.png' alt='1' /><img src='img/star-gray.png' alt='1' /><img src='img/star-gray.png' alt='1' />";
-    }
-    if ($rating == 4) {
-        echo "<img src='img/star-green.png' alt='1' /><img src='img/star-green.png' alt='1' /><img src='img/star-green.png' alt='1' /><img src='img/star-green.png' alt='1' /><img src='img/star-gray.png' alt='1' />";
-    }
-    if ($rating == 5) {
-        echo "<img src='img/star-green.png' alt='1' /><img src='img/star-green.png' alt='1' /><img src='img/star-green.png' alt='1' /><img src='img/star-green.png' alt='1' /><img src='img/star-green.png' alt='1' />";
-    }
-    echo "</span>";
-}
-
-/**
- * Display a DB item (in mode=show).
- *
- * @param int $id The ID of the item to show
- * @param string $display Can be 'compact' or 'default'
- * @return string|null HTML of the single item
- */
-function showDB($id, $display = 'default')
-{
-    global $pdo;
-    $sql = "SELECT items.*,
-        items_types.bgcolor,
-        items_types.name
-        FROM items
-        LEFT JOIN items_types ON (items.type = items_types.id)
-        WHERE items.id = :id";
-    $req = $pdo->prepare($sql);
-    $req->execute(array(
-        'id' => $id
-    ));
-    $item = $req->fetch();
-    if ($display === 'compact') {
-        // COMPACT MODE //
-        ?>
-            <section class='item_compact' style='border-left: 6px solid #<?php echo $item['bgcolor']; ?>'>
-            <a href='database.php?mode=view&id=<?php echo $item['id']; ?>'>
-            <span class='date date_compact'><?php echo $item['date']; ?></span>
-            <h4 style='padding-left:10px;border-right:1px dotted #ccd;color:#<?php echo $item['bgcolor']; ?>'><?php echo $item['name']; ?> </h4>
-            <span style='margin-left:7px'><?php echo stripslashes($item['title']); ?></span>
-        <?php
-        // STAR RATING read only
-        show_stars($item['rating']);
-        echo "</a></section>";
-
-    } else { // NOT COMPACT
-
-        echo "<section class='item' style='border-left: 6px solid #" . $item['bgcolor'] . "'>";
-        echo "<a href='database.php?mode=view&id=" . $item['id'] . "'>";
-        // show attached if there is a file attached
-        if (has_attachement($item['id'], 'items')) {
-            echo "<img style='clear:both' class='align_right' src='img/attached.png' alt='file attached' />";
-        }
-        // STARS
-        show_stars($item['rating']);
-        echo "<p class='title'>";
-        // show lock if item is locked on viewDB
-        if ($item['locked'] == 1) {
-            echo "<img style='padding-bottom:3px;' src='img/lock-blue.png' alt='lock' />";
-        }
-        // TITLE
-        echo stripslashes($item['title']) . "</p></a>";
-        // ITEM TYPE
-        echo "<span style='text-transform:uppercase;font-size:80%;padding-left:20px;color:#" . $item['bgcolor'] . "'>" . $item['name'] . " </span>";
-        // DATE
-        echo "<span class='date' style='padding:0 5px;'><img class='image' src='img/calendar.png' /> " . Tools::formatDate($item['date']) . "</span> ";
-        // TAGS
-        echo show_tags($id, 'items_tags');
-        echo "</section>";
-    }
-}
-
-/**
- * Sanitize title with a filter_var and remove the line breaks.
- *
- * @param string $input The title to sanitize
- * @return string Will return empty string if there is no input.
- */
-function check_title($input)
-{
-    // Check TITLE, what else ?
-    if ((isset($input)) && (!empty($input))) {
-        $title = filter_var($input, FILTER_SANITIZE_STRING);
-        // remove linebreak to avoid problem in javascript link list generation on editXP
-        return str_replace(array("\r\n", "\n", "\r"), ' ', $title);
-    } else {
-        return 'Untitled';
-    }
-}
-
-/**
- * Check if the date is valid.
- *
- * @param int $input The date to check
- * @return integer|string $input The input date if it's valid, or the date of today if not
- */
-function check_date($input)
-{
-    // Check DATE (is != null ? is 8 in length ? is int ? is valable ?)
-    if ((isset($input))
-        && (!empty($input))
-        && ((strlen($input) == '8'))
-        && is_pos_int($input)) {
-        // Check if day/month are good
-        $datemonth = substr($input, 4, 2);
-        $dateday = substr($input, 6, 2);
-        if (($datemonth <= '12')
-            && ($dateday <= '31')
-            && ($datemonth > '0')
-            && ($dateday > '0')) {
-                // SUCCESS on every test
-            return $input;
-        }
-    }
-    return kdate();
-}
-
-/**
- * Sanitize body with a white list of allowed html tags.
- *
- * @param string $input Body to sanitize
- * @return string The sanitized body or empty string if there is no input
- */
-function check_body($input)
-{
-    // Check BODY (sanitize only);
-    if ((isset($input)) && (!empty($input))) {
-        // we white list the allowed html tags
-        return strip_tags($input, "<div><br><br /><p><sub><img><sup><strong><b><em><u><a><s><font><span><ul><li><ol><blockquote><h1><h2><h3><h4><h5><h6><hr><table><tr><td><code><video><audio><pagebreak>");
-    }
-
-    return '';
-}
-
-/**
- * Check visibility for an experiment.
- *
- * @param string $input The visibility
- * @return string Will return team if the visibility is wrong
- */
-function check_visibility($input)
-{
-    $valid_visibility = array(
-        'public',
-        'organization',
-        'team',
-        'user');
-
-    if (in_array($input, $valid_visibility) || is_pos_int($input)) {
-        return $input;
-    }
-    // default is team
-    return 'team';
-}
-
-/**
  * For displaying messages using jquery ui highlight/error messages
  *
- * @param string $type Can be 'info', 'info_nocross' or 'error', 'error_nocross'
+ * @param string $type Can be 'ok', 'ko' or 'warning', with or without _nocross
  * @param string $message The message to display
  * @return boolean Will echo the HTML of the message
  */
 function display_message($type, $message)
 {
-    if ($type === 'info') {
+    if ($type === 'ok') {
 
-        echo "<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert'>&times</a><p>$message</p></div>";
+        echo "<div class='alert alert-success'><span class='glyphicon glyphicon-ok-circle' aria-hidden='true'></span><a href='#' class='close' data-dismiss='alert'>&times</a> $message</div>";
 
-    } elseif ($type === 'info_nocross') {
-        echo "<div class='alert alert-success'><p>$message</p></div>";
+    } elseif ($type === 'ok_nocross') {
+        echo "<div class='alert alert-success'><span class='glyphicon glyphicon-info-sign' aria-hidden='true'></span> $message</div>";
 
-    } elseif ($type === 'error') {
+    } elseif ($type === 'ko') {
 
-        echo "<div class='alert alert-danger'><a href='#' class='close' data-dismiss='alert'>&times</a><p>$message</p></div>";
+        echo "<div class='alert alert-danger'><span class='glyphicon glyphicon-exclamation-sign' aria-hidden='true'></span><a href='#' class='close' data-dismiss='alert'>&times</a> $message</div>";
 
-    } elseif ($type === 'error_nocross') {
-        echo "<div class='alert alert-danger'><p>$message</p></div>";
+    } elseif ($type === 'ko_nocross') {
+        echo "<div class='alert alert-danger'><span class='glyphicon glyphicon-remove-circle' aria-hidden='true'></span> $message</div>";
 
     } elseif ($type === 'warning') {
-        echo "<div class='alert alert-warning'><a href='#' class='close' data-dismiss='alert'>&times</a><p>$message</p></div>";
-
-    } elseif ($type === 'warning_nocross') {
-        echo "<div class='alert alert-warning'><p>$message</p></div>";
-
+        echo "<div class='alert alert-warning'><span class='glyphicon glyphicon-chevron-right' aria-hidden='true'></span><a href='#' class='close' data-dismiss='alert'>&times</a> $message</div>";
     }
 
     return false;
@@ -551,26 +119,6 @@ function is_owned_by_user($id, $table, $userid)
     $req->execute();
     $result = $req->fetchColumn();
     return $result === $userid;
-}
-
-/*
- * Can we edit/view this item ?
- *
- * @param int $id
- * @param int $team_id
- * @return bool
- */
-function item_is_in_team($id, $team_id)
-{
-    global $pdo;
-    // get what is the team id of that item
-    $sql = "SELECT team FROM items WHERE id = :id";
-    $req = $pdo->prepare($sql);
-    $req->bindParam(':id', $id, PDO::PARAM_INT);
-    $req->execute();
-    $item_team = $req->fetchColumn();
-    // check we are in this team
-    return $item_team == $team_id;
 }
 
 /**
@@ -624,48 +172,6 @@ function get_team_config($column = null)
     return "";
 }
 
-
-/**
- * Insert a log entry in the logs table
- *
- * @param string $type The type of the log. Can be 'Error', 'Warning', 'Info'
- * @param string $body The content of the log
- * @param string $user
- * @return bool Will return true if the query is successfull
- */
-function dblog($type, $user, $body)
-{
-    global $pdo;
-
-    // no need to check the params are they come from the code
-    $sql = "INSERT INTO logs (type, user, body) VALUES (:type, :user, :body)";
-    $req = $pdo->prepare($sql);
-    $req->bindParam(':type', $type);
-    $req->bindParam(':user', $user);
-    $req->bindParam(':body', $body);
-    try {
-        $req->execute();
-    } catch (Exception $e) {
-        return false;
-    }
-    return true;
-}
-
-/**
- * Display the end of page.
- * Only used in install/index.php
- *
- * @return string|null The HTML of the end of the page
- */
-function custom_die()
-{
-    echo "
-    </section>
-    </body>
-    </html>";
-    die();
-}
-
 /**
  * Used in sysconfig.php to update config values
  *
@@ -696,14 +202,14 @@ function update_config($array)
 function checkSelectOrder($val)
 {
     if (isset($_GET['order']) && $_GET['order'] === $val) {
-        echo " selected";
+        return " selected";
     }
 }
 
 function checkSelectSort($val)
 {
     if (isset($_GET['sort']) && $_GET['sort'] === $val) {
-        echo " selected";
+        return " selected";
     }
 }
 
@@ -756,7 +262,7 @@ function getMailer()
     // Choose mail transport method; either smtp or sendmail
     $mail_method = get_config('mail_method');
 
-    $crypto = new \Elabftw\Elabftw\CryptoWrapper();
+    $crypto = new CryptoWrapper();
 
     switch ($mail_method) {
 
@@ -808,35 +314,13 @@ function get_total_time()
 }
 
 /**
- * Display the tags
- *
- * @return string HTML
- */
-function displayTags($type, $id)
-{
-    global $pdo;
-    $sql = "SELECT id, tag FROM " . $type . "_tags WHERE item_id = :item_id";
-    $tagreq = $pdo->prepare($sql);
-    $tagreq->bindParam(':item_id', $id);
-    $tagreq->execute();
-
-    $html = "<img src='img/tags.png' class='bot5px' alt='tags' /><label for='addtaginput'>" . _('Tags') . "</label>";
-    $html .= "<div class='tags'><span id='tags_div'>";
-    while ($tags = $tagreq->fetch()) {
-        $html .= "<span class='tag'><a onclick='delete_tag(" . $tags['id'] . "," . $id . ")'>" . stripslashes($tags['tag']) . "</a></span>";
-    }
-    $html .= "</span><input type='text' name='tag' id='addtaginput' placeholder='" . _('Add a tag') . "' /></div>";
-    return $html;
-}
-
-/**
  * Inject the script/css for chemdoodle
  *
  * @return string|null
  */
 function addChemdoodle()
 {
-    if ($_SESSION['prefs']['chem_editor']) {
+    if (isset($_SESSION['prefs']['chem_editor']) && $_SESSION['prefs']['chem_editor']) {
         $html = "<link rel='stylesheet' href='css/chemdoodle.css' type='text/css'>";
         $html .= "<script src='js/chemdoodle.js'></script>";
         $html .= "<script src='js/chemdoodle-uis.js'></script>";
@@ -855,52 +339,41 @@ function addChemdoodle()
  */
 function getDbList($format = 'default')
 {
-    global $pdo;
-
     $link_list = "";
     $tinymce_list = "";
-    $sql = "SELECT items_types.name,
-    items.id AS itemid,
-    items.* FROM items
-    LEFT JOIN items_types
-    ON items.type = items_types.id
-    WHERE items.team = :team";
-    $getalllinks = $pdo->prepare($sql);
-    $getalllinks->bindParam(':team', $_SESSION['team_id'], PDO::PARAM_INT);
-    if ($getalllinks->execute()) {
 
-        while ($link = $getalllinks->fetch()) {
-            $link_type = $link['name'];
-            // html_entity_decode is needed to convert the quotes
-            // str_replace to remove ' because it messes everything up
-            $link_name = str_replace(array("'", "\""), "", html_entity_decode(substr($link['title'], 0, 60), ENT_QUOTES));
-            // remove also the % (see issue #62)
-            $link_name = str_replace("%", "", $link_name);
+    $Database = new Database($_SESSION['team_id']);
+    $itemsArr = $Database->readAll();
 
-            // now build the list in both formats
-            $link_list .= "'" . $link['itemid'] . " - " . $link_type . " - " . $link_name . "',";
-            $tinymce_list .= "{ name : \"<a href='database.php?mode=view&id=" . $link['itemid'] . "'>" . $link_name . "</a>\"},";
-        }
+    foreach ($itemsArr as $item) {
+
+        // html_entity_decode is needed to convert the quotes
+        // str_replace to remove ' because it messes everything up
+        $link_name = str_replace(array("'", "\""), "", html_entity_decode(substr($item['title'], 0, 60), ENT_QUOTES));
+        // remove also the % (see issue #62)
+        $link_name = str_replace("%", "", $link_name);
+
+        // now build the list in both formats
+        $link_list .= "'" . $item['itemid'] . " - " . $item['name'] . " - " . $link_name . "',";
+        $tinymce_list .= "{ name : \"<a href='database.php?mode=view&id=" . $item['itemid'] . "'>" . $link_name . "</a>\"},";
     }
 
     if ($format === 'default') {
         return $link_list;
-    } else {
-        // complete the list with experiments (only for tinymce)
-        // fix #191
-        $sql = "SELECT id, title FROM experiments WHERE userid = :userid";
-        $getalllinks = $pdo->prepare($sql);
-        $getalllinks->bindParam(':userid', $_SESSION['userid'], PDO::PARAM_INT);
-        if ($getalllinks->execute()) {
-
-            while ($link = $getalllinks->fetch()) {
-                $link_name = str_replace(array("'", "\""), "", html_entity_decode(substr($link['title'], 0, 60), ENT_QUOTES));
-                // remove also the % (see issue #62)
-                $link_name = str_replace("%", "", $link_name);
-                $tinymce_list .= "{ name : \"<a href='experiments.php?mode=view&id=" . $link['id'] . "'>" . $link_name . "</a>\"},";
-            }
-        }
-
-        return $tinymce_list;
     }
+
+    // complete the list with experiments (only for tinymce)
+    // fix #191
+    $Experiments = new Experiments($_SESSION['userid']);
+    $expArr = $Experiments->readAll();
+
+    foreach ($expArr as $exp) {
+
+        $link_name = str_replace(array("'", "\""), "", html_entity_decode(substr($exp['title'], 0, 60), ENT_QUOTES));
+        // remove also the % (see issue #62)
+        $link_name = str_replace("%", "", $link_name);
+        $tinymce_list .= "{ name : \"<a href='experiments.php?mode=view&id=" . $exp['id'] . "'>" . $link_name . "</a>\"},";
+    }
+
+    return $tinymce_list;
 }

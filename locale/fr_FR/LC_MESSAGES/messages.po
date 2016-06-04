@@ -2,14 +2,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: elabftw\n"
 "POT-Creation-Date: 2015-03-04 14:57+0100\n"
-"PO-Revision-Date: 2016-01-13 17:38+0100\n"
+"PO-Revision-Date: 2016-04-27 12:13+0200\n"
 "Last-Translator: Nicolas CARPi <nicolas.carpi@gmail.com>\n"
 "Language-Team: \n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.6\n"
+"X-Generator: Poedit 1.8.7.1\n"
 "X-Poedit-Basepath: .\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Poedit-SourceCharset: UTF-8\n"
@@ -62,6 +62,33 @@ msgstr "Importer un CSV"
 
 msgid "Import ZIP"
 msgstr "Importer un ZIP"
+
+msgid "Groups"
+msgstr "Groupes"
+
+msgid "Manage groups of users"
+msgstr "Gérez des groupes d'utilisateurs"
+
+msgid "Create a group"
+msgstr "Créer un groupe"
+
+msgid "Add this user"
+msgstr "Ajouter cet utilisateur"
+
+msgid "to this group"
+msgstr "à ce groupe"
+
+msgid "Go"
+msgstr "Valider"
+
+msgid "Remove this user"
+msgstr "Retirer cet utilisateur"
+
+msgid "from this group"
+msgstr "de ce groupe"
+
+msgid "Existing groups"
+msgstr "Groupes existants"
 
 #: elabftw/admin.php:91
 msgid "Configure your team"
@@ -148,20 +175,15 @@ msgid "Has an active account?"
 msgstr "Compte activé ?"
 
 #: elabftw/admin.php:173
-msgid "Group:"
-msgstr "Groupe :"
+msgid "Group"
+msgstr "Groupe"
 
 #: elabftw/admin.php:195
-msgid "Reset user password:"
-msgstr "Réinitialiser le mot de passe utilisateur :"
+msgid "Reset user password"
+msgstr "Réinitialiser le mot de passe utilisateur"
 
-#: elabftw/admin.php:198
-msgid "Repeat new password:"
-msgstr "Répéter le nouveau mot de passe :"
-
-#: elabftw/admin.php:203
-msgid "Edit this user"
-msgstr "Éditer cet utilisateur"
+msgid "characters minimum"
+msgstr "caractères au minimum"
 
 #: elabftw/admin.php:219
 msgid "DANGER ZONE"
@@ -211,13 +233,9 @@ msgstr "Catégories d'items de la base de données"
 msgid "Remove all database items with this type before deleting this type."
 msgstr "Supprimez tous les items de la base de données de cette catégorie avant de supprimer cette catégorie."
 
-#: elabftw/admin.php:363
-msgid "Edit name"
-msgstr "Éditer le nom"
-
 #: elabftw/admin.php:393
-msgid "Add a new type of item:"
-msgstr "Ajouter une nouvelle catégorie d'items :"
+msgid "Add a new type of item"
+msgstr "Ajouter une nouvelle catégorie d'items"
 
 #: elabftw/admin.php:402 elabftw/inc/viewXP.php:259 elabftw/sysconfig.php:164
 #: elabftw/sysconfig.php:200 elabftw/sysconfig.php:226
@@ -315,10 +333,6 @@ msgstr "Équipe ajoutée avec succès."
 #: elabftw/app/ucp-exec.php:88
 msgid "Configuration updated successfully."
 msgstr "Configuration mise à jour avec succès."
-
-#: elabftw/app/admin-exec.php:551 elabftw/app/reset.php:159
-msgid "Userid is not valid."
-msgstr "L'id utilisateur n'est pas valide."
 
 #: elabftw/app/admin-exec.php:576
 msgid "Only a sysadmin can put someone sysadmin."
@@ -515,7 +529,7 @@ msgid "Email not found in database!"
 msgstr "Cette adresse email n'est pas dans la base de données !"
 
 #: elabftw/app/reset.php:173
-msgid "New password updated. You can now login."
+msgid "New password created. You can now login."
 msgstr "Nouveau mot de passe mis à jour. Vous pouvez vous connecter désormais."
 
 #: elabftw/app/timestamp.php:93 elabftw/app/timestamp.php:107
@@ -794,11 +808,6 @@ msgstr "Créer depuis un modèle"
 #: elabftw/inc/showXP.php:38
 msgid "Filter status"
 msgstr "Filtrer les statuts"
-
-#: elabftw/inc/showXP.php:65
-#, php-format
-msgid "<strong>You do not have any templates yet.</strong> Go to %syour control panel%s to make one !"
-msgstr "<strong>Vous n'avez pas encore créé de modèles.</strong> Rendez-vous dans %svotre panneau de contrôle%s pour en ajouter !"
 
 #: elabftw/inc/showXP.php:139
 msgid "results."
@@ -1442,8 +1451,17 @@ msgstr "Ajouter un modèle"
 msgid "Edit template"
 msgstr "Éditer un modèle"
 
+msgid "Edit the template"
+msgstr "Éditer le modèle"
+
+msgid "Delete"
+msgstr "Supprimer"
+
 msgid "Select a tag"
 msgstr "Choisir un tag"
+
+msgid "Clear all logs"
+msgstr "Supprimer tous les messages loggués"
 
 msgid "With the tag"
 msgstr "Avec le tag"
@@ -1499,11 +1517,17 @@ msgstr "Rester connecté"
 msgid "This doesn't look like the right kind of file. Import aborted."
 msgstr "Mauvais type de fichier. Importation arrêtée."
 
-msgid "Edit color"
-msgstr "Editer la couleur"
+msgid "Color"
+msgstr "Couleur"
 
 msgid "All the team"
 msgstr "Toute l'équipe"
 
 msgid "Space means"
 msgstr "Espace signifie"
+
+msgid "Tag is too short!"
+msgstr "Le tag est trop court!"
+
+msgid "Promote someone to sysadmin"
+msgstr "Ajouter un sysadmin"

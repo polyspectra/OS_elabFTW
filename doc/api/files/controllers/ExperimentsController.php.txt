@@ -1,0 +1,109 @@
+<?php
+/**
+ * app/controllers/ExperimentsController.php
+ *
+ * @author Nicolas CARPi <nicolas.carpi@curie.fr>
+ * @copyright 2012 Nicolas CARPi
+ * @see http://www.elabftw.net Official website
+ * @license AGPL-3.0
+ * @package elabftw
+ */
+
+namespace Elabftw\Elabftw;
+
+use Exception;
+
+/**
+ * Experiments
+ *
+ */
+require_once '../../inc/common.php';
+
+try {
+
+    // CREATE
+    if (isset($_GET['create'])) {
+        $Experiments = new Experiments($_SESSION['userid']);
+        if (isset($_GET['tpl']) && !empty($_GET['tpl'])) {
+            $id = $Experiments->create($_GET['tpl']);
+        } else {
+            $id = $Experiments->create();
+        }
+        header("location: ../../experiments.php?mode=edit&id=" . $id);
+    }
+
+    // UPDATE
+    if (isset($_POST['update'])) {
+        $Experiments = new Experiments($_SESSION['userid'], $_POST['id']);
+        if ($Experiments->update(
+            $_POST['title'],
+            $_POST['date'],
+            $_POST['body']
+        )) {
+            header("location: ../../experiments.php?mode=view&id=" . $_POST['id']);
+        } else {
+            throw new Exception('Error updating experiment');
+        }
+    }
+
+    // DUPLICATE
+    if (isset($_GET['duplicateId'])) {
+        $Experiments = new Experiments($_SESSION['userid'], $_GET['duplicateId']);
+        $id = $Experiments->duplicate();
+        $mode = 'edit';
+        header("location: ../../experiments.php?mode=" . $mode . "&id=" . $id);
+    }
+
+    // UPDATE STATUS
+    if (isset($_POST['updateStatus'])) {
+        $Experiments = new Experiments($_SESSION['userid'], $_POST['id']);
+        echo $Experiments->updateStatus($_POST['status']);
+    }
+
+    // UPDATE VISIBILITY
+    if (isset($_POST['updateVisibility'])) {
+        $Experiments = new Experiments($_SESSION['userid'], $_POST['id']);
+        if ($Experiments->updateVisibility($_POST['visibility'])) {
+            echo '1';
+        } else {
+            echo '0';
+        }
+    }
+
+    // CREATE LINK
+    if (isset($_POST['createLink'])) {
+        $Experiments = new Experiments($_SESSION['userid'], $_POST['id']);
+        if ($Experiments->Links->create($_POST['linkId'])) {
+            echo '1';
+        } else {
+            echo '0';
+        }
+    }
+
+    // DESTROY LINK
+    if (isset($_POST['destroyLink'])) {
+        $Experiments = new Experiments($_SESSION['userid'], $_POST['id']);
+        if ($Experiments->Links->destroy($_POST['linkId'])) {
+            echo '1';
+        } else {
+            echo '0';
+        }
+    }
+
+    // DESTROY
+    if (isset($_POST['destroy'])) {
+        $Experiments = new Experiments($_SESSION['userid'], $_POST['id']);
+        if ($Experiments->destroy()) {
+            echo '1';
+        } else {
+            echo '0';
+        }
+    }
+
+} catch (Exception $e) {
+    $Logs = new Logs();
+    $Logs->create('Error', $_SESSION['userid'], $e->getMessage());
+    $_SESSION['ko'][] = Tools::error();
+    header('Location: ../../experiments.php');
+}
+

@@ -8,13 +8,14 @@
  * @license AGPL-3.0
  * @package elabftw
  */
+namespace Elabftw\Elabftw;
+
+use PDO;
 
 /**
  * The search page
  *
  */
-use \Elabftw\Elabftw\Tools as Tools;
-
 require_once 'inc/common.php';
 $page_title = _('Search');
 $selected_menu = 'Search';
@@ -80,7 +81,7 @@ $search_type = '';
                     $req = $pdo->prepare($sql);
                     // we want to show the tags of the selected person in 'search in' dropdown
                     // so if there is a owner parameter, use it to select tags
-                    if (isset($_GET['owner']) && is_pos_int($_GET['owner'])) {
+                    if (isset($_GET['owner']) && Tools::checkId($_GET['owner'])) {
                         $userid = $_GET['owner'];
                     } else {
                         $userid = $_SESSION['userid'];
@@ -169,13 +170,13 @@ $search_type = '';
                 <label for='from'><?php echo _('Where date is between'); ?></label>
                 <input id='from' name='from' type='text' size='8' class='datepicker' value='<?php
                 if (isset($_GET['from']) && !empty($_GET['from'])) {
-                    echo check_date($_GET['from']);
+                    echo Tools::kdate($_GET['from']);
                 }
                 ?>'/>
                 <label span style='margin:0 10px;' for='to'> <?php echo _('and'); ?> </label>
                 <input id='to' name='to' type='text' size='8' class='datepicker' value='<?php
                     if (isset($_GET['to']) && !empty($_GET['to'])) {
-                        echo check_date($_GET['to']);
+                        echo Tools::kdate($_GET['to']);
                     }
                 ?>'/>
             </div>
@@ -188,7 +189,7 @@ $search_type = '';
             <label for='title'><?php echo _('And title contains'); ?></label>
             <input id='title' name='title' type='text' value='<?php
                 if (isset($_GET['title']) && !empty($_GET['title'])) {
-                    echo check_title($_GET['title']);
+                    echo Tools::checkTitle($_GET['title']);
                 }
                 ?>'/>
             </div>
@@ -231,7 +232,7 @@ $search_type = '';
             <label for='body'><?php echo _('And body contains'); ?></label>
             <input id='body' name='body' type='text' value='<?php
                 if (isset($_GET['body']) && !empty($_GET['body'])) {
-                    echo check_body($_GET['body']);
+                    echo Tools::checkBody($_GET['body']);
                 }
                 ?>'/>
             <!-- AND / OR -->
@@ -305,7 +306,7 @@ if (isset($_GET)) {
             $body_arr = explode(' ', trim($_GET['body']));
             $body = '';
         } else {
-            $body = filter_var(check_body(trim($_GET['body'])), FILTER_SANITIZE_STRING);
+            $body = filter_var(Tools::checkBody(trim($_GET['body'])), FILTER_SANITIZE_STRING);
         }
     } else { // no body input
         $body = '';
@@ -313,14 +314,14 @@ if (isset($_GET)) {
 
     // FROM
     if (isset($_GET['from']) && !empty($_GET['from'])) {
-        $from = check_date($_GET['from']);
+        $from = Tools::kdate($_GET['from']);
     } else {
         $from = '';
     }
 
     // TO
     if (isset($_GET['to']) && !empty($_GET['to'])) {
-        $to = check_date($_GET['to']);
+        $to = Tools::kdate($_GET['to']);
     } else {
         $to = '';
     }
@@ -335,7 +336,7 @@ if (isset($_GET)) {
     }
 
     // STATUS
-    if (isset($_GET['status']) && !empty($_GET['status']) && is_pos_int($_GET['status'])) {
+    if (isset($_GET['status']) && !empty($_GET['status']) && Tools::checkId($_GET['status'])) {
         $status = $_GET['status'];
     } else {
         $status = '';
@@ -353,7 +354,7 @@ if (isset($_GET)) {
     }
 
     // OWNER
-    if (isset($_GET['owner']) && !empty($_GET['owner']) && is_pos_int($_GET['owner'])) {
+    if (isset($_GET['owner']) && !empty($_GET['owner']) && Tools::checkId($_GET['owner'])) {
         $owner_search = true;
         $owner = $_GET['owner'];
     } else {
@@ -473,7 +474,7 @@ if (isset($_GET)) {
             $search_type = 'experiments';
 
         // DATABASE SEARCH
-        } elseif (is_pos_int($_GET['type']) || $_GET['type'] === 'database') {
+        } elseif (Tools::checkId($_GET['type']) || $_GET['type'] === 'database') {
             // we want only stuff from our team
             $sqlTeam = " AND i.team = " . $_SESSION['team_id'];
 
@@ -514,7 +515,7 @@ if (isset($_GET)) {
         // BEGIN DISPLAY RESULTS
 
         if ($req->rowCount() === 0) {
-                display_message('error_nocross', _("Sorry. I couldn't find anything :("));
+                display_message('ko_nocross', _("Sorry. I couldn't find anything :("));
         } else {
             while ($get_id = $req->fetch()) {
                 $results_arr[] = $get_id['id'];
@@ -539,12 +540,22 @@ if (isset($_GET)) {
             echo "<p class='smallgray'>" . count($results_arr) . " " . ngettext("result found", "results found", count($results_arr)) . " (" . $total_time['time'] . " " . $total_time['unit'] . ")</p>";
             // Display results
             echo "<hr>";
+            if ($search_type === 'experiments') {
+                $EntityView = new ExperimentsView(new Experiments($_SESSION['userid']));
+            } else {
+                $EntityView = new DatabaseView(new Database($_SESSION['team_id']));
+            }
+
             foreach ($results_arr as $id) {
                 if ($search_type === 'experiments') {
-                    showXP($id, $_SESSION['prefs']['display']);
+                    $EntityView->Experiments->id = $id;
+                    $item = $EntityView->Experiments->read();
                 } else {
-                    showDB($id, $_SESSION['prefs']['display']);
+                    $EntityView->Database->id = $id;
+                    $item = $EntityView->Database->read();
                 }
+
+                echo $EntityView->showUnique($item);
             }
         }
     }
@@ -552,30 +563,6 @@ if (isset($_GET)) {
 ?>
 
 <script>
-function insertParamAndReload(key, value) {
-    key = escape(key); value = escape(value);
-
-    var kvp = document.location.search.substr(1).split('&');
-    if (kvp == '') {
-        document.location.search = '?' + key + '=' + value;
-    } else {
-
-        var i = kvp.length; var x; while (i--) {
-            x = kvp[i].split('=');
-
-            if (x[0] == key) {
-                x[1] = value;
-                kvp[i] = x.join('=');
-                break;
-            }
-        }
-
-        if (i < 0) { kvp[kvp.length] = [key, value].join('='); }
-
-        // reload the page
-        document.location.search = kvp.join('&');
-    }
-}
 $(document).ready(function(){
     // DATEPICKER
     $( ".datepicker" ).datepicker({dateFormat: 'yymmdd'});

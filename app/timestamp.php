@@ -1,48 +1,30 @@
 <?php
-/********************************************************************************
-*                                                                               *
-*   Copyright 2012 Nicolas CARPi (nicolas.carpi@gmail.com)                      *
-*   http://www.elabftw.net/                                                     *
-*                                                                               *
-********************************************************************************/
+/**
+ * timestamp.php
+ *
+ * @author Nicolas CARPi <nicolas.carpi@curie.fr>
+ * @copyright 2012 Nicolas CARPi
+ * @see http://www.elabftw.net Official website
+ * @license AGPL-3.0
+ * @package elabftw
+ */
+namespace Elabftw\Elabftw;
 
-/********************************************************************************
-*  This file is part of eLabFTW.                                                *
-*                                                                               *
-*    eLabFTW is free software: you can redistribute it and/or modify            *
-*    it under the terms of the GNU Affero General Public License as             *
-*    published by the Free Software Foundation, either version 3 of             *
-*    the License, or (at your option) any later version.                        *
-*                                                                               *
-*    eLabFTW is distributed in the hope that it will be useful,                 *
-*    but WITHOUT ANY WARRANTY; without even the implied                         *
-*    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR                    *
-*    PURPOSE.  See the GNU Affero General Public License for more details.      *
-*                                                                               *
-*    You should have received a copy of the GNU Affero General Public           *
-*    License along with eLabFTW.  If not, see <http://www.gnu.org/licenses/>.   *
-*                                                                               *
-********************************************************************************/
-require_once '../inc/common.php';
+use Exception;
 
-// ID
-if (isset($_GET['id']) && !empty($_GET['id']) && is_pos_int($_GET['id'])) {
-    $id = $_GET['id'];
-} else {
-    display_message('error', _("The id parameter is not valid!"));
-    require_once '../inc/footer.php';
-    exit;
-}
-
-// timestamping begins
+/**
+ * Timestamp an experiment
+ *
+ */
 try {
-    $ts = new Elabftw\Elabftw\TrustedTimestamps($id);
-    $ts->timeStamp();
-} catch (Exception $e) {
-    $msg_arr = array();
-    $msg_arr[] = $e->getMessage();
-    $_SESSION['errors'] = $msg_arr;
-}
+    require_once '../inc/common.php';
 
-// redirect
-header("Location: ../experiments.php?mode=view&id=" . $id);
+    $ts = new TrustedTimestamps($_GET['id']);
+    $ts->timeStamp();
+
+} catch (Exception $e) {
+    $_SESSION['ko'][] = $e->getMessage();
+
+} finally {
+    header("Location: ../experiments.php?mode=view&id=" . $_GET['id']);
+}

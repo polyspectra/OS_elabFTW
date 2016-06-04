@@ -7,46 +7,9 @@
  * @see http://www.elabftw.net Official website
  * @license AGPL-3.0
  */
-// Random title
-$ftw_arr = array();
-// Lots of 'For The World' so the other ones appear more rarely
-for ($i = 0; $i < 200; $i++) {
-    $ftw_arr[] = 'For The World';
-}
-// Now the fun ones
-$ftw_arr[] = 'For Those Wondering';
-$ftw_arr[] = 'For The Worms';
-$ftw_arr[] = 'Forever Two Wheels';
-$ftw_arr[] = 'Free The Wookies';
-$ftw_arr[] = 'Forward The Word';
-$ftw_arr[] = 'Forever Together Whenever';
-$ftw_arr[] = 'Face The World';
-$ftw_arr[] = 'Forget The World';
-$ftw_arr[] = 'Free To Watch';
-$ftw_arr[] = 'Feed The World';
-$ftw_arr[] = 'Feel The Wind';
-$ftw_arr[] = 'Feel The Wrath';
-$ftw_arr[] = 'Fight To Win';
-$ftw_arr[] = 'Find The Waldo';
-$ftw_arr[] = 'Finding The Way';
-$ftw_arr[] = 'Flying Training Wing';
-$ftw_arr[] = 'Follow The Way';
-$ftw_arr[] = 'For The Wii';
-$ftw_arr[] = 'For The Win';
-$ftw_arr[] = 'For The Wolf';
-$ftw_arr[] = 'Free The Weed';
-$ftw_arr[] = 'Free The Whales';
-$ftw_arr[] = 'From The Wilderness';
-$ftw_arr[] = 'Freedom To Work';
-$ftw_arr[] = 'For The Warriors';
-$ftw_arr[] = 'Full Time Workers';
-$ftw_arr[] = 'Fabricated To Win';
-$ftw_arr[] = 'Furiously Taunted Wookies';
-$ftw_arr[] = 'Flash The Watch';
-shuffle($ftw_arr);
-$ftw = $ftw_arr[0];
-?>
+namespace Elabftw\Elabftw;
 
+?>
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -57,12 +20,15 @@ $ftw = $ftw_arr[0];
 <meta name='referrer' content='origin'>
 <link rel="icon" type="image/ico" href="img/favicon.ico" />
 <?php
-echo "<title>" . (isset($page_title) ? $page_title : "Lab manager") . " - eLab " . $ftw . "</title>";
+echo "<title>" . (isset($page_title) ? $page_title : "Lab manager") . " - eLab " . Tools::getFtw() . "</title>";
 ?>
 <!-- CSS -->
 <!-- Bootstrap -->
 <link rel="stylesheet" media="all" href="js/bootstrap/dist/css/bootstrap.min.css">
 <link rel="stylesheet" media="all" href="css/main.min.css" />
+<link rel="stylesheet" media="all" href="js/colorpicker/jquery.colorpicker.css" />
+<link rel="stylesheet" media="all" href="js/fancybox/source/jquery.fancybox.css" />
+
 <link rel="stylesheet" media="all" href="js/jquery-ui/themes/smoothness/jquery-ui.min.css" />
 <!-- JAVASCRIPT -->
 <script src="js/jquery/dist/jquery.min.js"></script>
@@ -72,6 +38,7 @@ echo "<title>" . (isset($page_title) ? $page_title : "Lab manager") . " - eLab "
 <!-- bootstrap JS -->
 <script src="js/bootstrap/js/alert.js"></script>
 <script src="js/bootstrap/js/dropdown.js"></script>
+<script src="js/bootstrap/js/button.js"></script>
 </head>
 
 <body>
@@ -131,7 +98,7 @@ if (isset($_SESSION['auth']) && $_SESSION['auth'] === 1) {
 if (isset($_SESSION['auth'])) {
     ?>
     <div>
-        <?php echo _('Howdy,') . ' '; ?><a href='profile.php' title='<?php echo _('Profile'); ?>'><?php echo $_SESSION['username']; ?></a><br>
+        <?php echo _('Howdy,') . ' '; ?><a href='profile.php' title='<?php echo _('Profile'); ?>'><?php echo $_SESSION['firstname']; ?></a><br>
         <a href='ucp.php'><img src='img/settings.png' alt='<?php echo _('Settings'); ?>' title='<?php echo _('Settings'); ?>' /></a> |
         <a href='app/logout.php'><img src='img/logout.png' alt='<?php echo _('Logout'); ?>' title='<?php echo _('Logout'); ?>' /></a>
     </div>
@@ -148,16 +115,16 @@ if (isset($_SESSION['auth'])) {
 
 <?php
 // INFO BOX
-if (isset($_SESSION['errors']) && is_array($_SESSION['errors']) && count($_SESSION['errors']) > 0) {
-    foreach ($_SESSION['errors'] as $msg) {
-        display_message('error', $msg);
+if (isset($_SESSION['ko']) && is_array($_SESSION['ko']) && count($_SESSION['ko']) > 0) {
+    foreach ($_SESSION['ko'] as $msg) {
+        display_message('ko', $msg);
     }
-    unset($_SESSION['errors']);
+    unset($_SESSION['ko']);
 }
 
-if (isset($_SESSION['infos']) && is_array($_SESSION['infos']) && count($_SESSION['infos']) > 0) {
-    foreach ($_SESSION['infos'] as $msg) {
-        display_message('info', $msg);
+if (isset($_SESSION['ok']) && is_array($_SESSION['ok']) && count($_SESSION['ok']) > 0) {
+    foreach ($_SESSION['ok'] as $msg) {
+        display_message('ok', $msg);
     }
-    unset($_SESSION['infos']);
+    unset($_SESSION['ok']);
 }
