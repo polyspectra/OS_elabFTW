@@ -90,7 +90,7 @@ if (isset($_SESSION['auth']) && $_SESSION['auth'] === 1) {
 
     echo "</nav>";
 } else { // not logged in, show only logo, no menu
-    echo "<nav><span id='logonav' class='navleft'>elab<strong>FTW</strong></span></nav>";
+    echo "<nav><span id='logonav' class='navleft'>Open<strong>Sauce</strong></span></nav>";
 }
 ?>
 <div id='real_container'>
