@@ -25,11 +25,11 @@
 <footer>
 
     <p class='footer_left'>
-    <a href='https://twitter.com/elabftw'>
-    <img src='img/twitter.png' alt='twitter' title='Follow eLabFTW on Twitter !'>
+    <a href='https://twitter.com/materialsgirlco'>
+    <img src='img/twitter.png' alt='twitter' title='Follow materialsGIRL on Twitter !'>
     </a>
-     <a href='https://github.com/elabftw/elabftw'>
-    <img src='img/github.png' alt='github' title='eLabFTW on GitHub'>
+    <a href='https://github.com/polyspectra/OS_elabFTW'>
+    <img src='img/github.png' alt='github' title='Open Sauce eLabFTW on GitHub'>
     </a>
     <span>
         <span class='strong'>
