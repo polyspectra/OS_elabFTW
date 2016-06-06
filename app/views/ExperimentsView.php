@@ -376,6 +376,9 @@ class ExperimentsView extends EntityView
 
                 throw new Exception(_("<strong>Access forbidden:</strong> the visibility setting of this experiment is set to 'owner only'."));
 
+            } elseif ($this->experiment['visibility'] === 'public'){
+                //read only if public - opensauce
+                return true;
             } elseif (Tools::checkId($this->experiment['visibility'])) {
                 // the visibility of this experiment is set to a group
                 // we must check if current user is in this group
