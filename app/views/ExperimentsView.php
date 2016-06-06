@@ -749,7 +749,7 @@ class ExperimentsView extends EntityView
     private function buildCommentsDisabled()
     {
         $html .= "<div id='expcomment' class='box'>";
-        $html .= "<h4> Please sign up to comment! </h4>";
+        $html .= "<h4> Please <a href='register.php'> sign up </a> to comment! </h4>";
 
         return $html;
     }
