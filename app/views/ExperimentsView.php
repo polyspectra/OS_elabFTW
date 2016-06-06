@@ -79,6 +79,8 @@ class ExperimentsView extends EntityView
         //only allow comments if logged in
         if($_SESSION['userid']){
             $html .= $this->buildCommentsCreate();
+        } else {
+            $html .= $this->buildCommentsDisabled();
         }
         $html .= $this->buildViewJs();
 
@@ -738,5 +740,15 @@ class ExperimentsView extends EntityView
             $this->Experiments->id . ")'>" . _('Save') . "</button></div></div></section>";
 
         return $html;
+    }
+
+    /**
+     * HTML for the encouraging users to sign up to comment
+     */
+
+    private function buildCommentsDisabled()
+    {
+        $html .= "<div id='expcomment' class='box'>";
+        $html .= "<h4> Please sign up to comment! </h4>";
     }
 }
