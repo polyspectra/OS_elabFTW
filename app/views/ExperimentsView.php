@@ -75,7 +75,11 @@ class ExperimentsView extends EntityView
         $html .= $this->buildView();
         $html .= $this->UploadsView->buildUploads('view');
         $html .= $this->buildComments();
-        $html .= $this->buildCommentsCreate();
+
+        //only allow comments if logged in
+        if($_SESSION['userid']){
+            $html .= $this->buildCommentsCreate();
+        }
         $html .= $this->buildViewJs();
 
         return $html;
