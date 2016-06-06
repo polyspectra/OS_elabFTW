@@ -750,5 +750,7 @@ class ExperimentsView extends EntityView
     {
         $html .= "<div id='expcomment' class='box'>";
         $html .= "<h4> Please sign up to comment! </h4>";
+
+        return $html;
     }
 }
