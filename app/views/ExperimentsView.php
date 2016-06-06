@@ -257,7 +257,12 @@ class ExperimentsView extends EntityView
         if ($this->experiment['visibility'] === 'organization') {
             $html .= "selected";
         }
-        $html .= ">" . _('Everyone with an account') . "</option>";
+        $html .= ">" . _('Everyone with an OpenSauce account') . "</option>";
+        $html .= "<option value='public' ";
+        if ($this->experiment['visibility'] === 'public') {
+            $html .= "selected";
+        }
+        $html .= ">" . _('Everyone in the world!') . "</option>";
         $html .= "<option value='team' ";
         if ($this->experiment['visibility'] === 'team') {
             $html .= "selected";
